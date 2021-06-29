@@ -10,7 +10,6 @@ api = Api(app)
 class getResults(Resource):
     @cross_origin()
     def post(self):
-        print("Testing")
         query = request.json['query']
         result = main.search_similar_circulars(query)
         return jsonify({"result": result})
