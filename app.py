@@ -4,13 +4,13 @@ from flask_cors import CORS, cross_origin
 import main
 app = Flask(__name__)
 app.config['CORS_HEADERS'] = 'Content-Type'
-CORS(app, resources={r"*": {"origins": "*"}}, allow_headers="*", origin="*")
+CORS(app)        #, resources={r"*": {"origins": "*"}}, allow_headers="*", origin="*")
 api = Api(app)
 
 class getResults(Resource):
     @cross_origin()
     def post(self):
-        query = request.json['query']
+        query = request.form['query']
         result = main.search_similar_circulars(query)
         return jsonify({"result": result})
 

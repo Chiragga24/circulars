@@ -6,7 +6,14 @@ import string
 import operator
 import re
 import spacy
-
+import pickle
+from keras.models import load_model
+model = load_model('chatbot_model.h5')
+import json
+import random
+intents = json.loads(open('intents.json').read())
+words = pickle.load(open('words.pkl','rb'))
+classes = pickle.load(open('classes.pkl','rb'))
 circulars = pd.read_csv('Test_File.csv')
 
 from spacy.lang.en.stop_words import STOP_WORDS
@@ -67,7 +74,36 @@ from operator import itemgetter
 
 def search_similar_circulars(search_term):
 
-    query_bow = dictionary.doc2bow(spacy_tokenizer(search_term))
+    sentence_words = spacy_tokenizer(search_term)
+    bag = [0]*len(words)
+    for s in sentence_words:
+        for i,w in enumerate(words):
+            if w == s:
+                # assign 1 if current word is in the vocabulary position
+                bag[i] = 1
+    res = model.predict(np.array([np.array(bag)]))[0]
+    ERROR_THRESHOLD = 0.25
+    results = [[i,r] for i,r in enumerate(res) if r>ERROR_THRESHOLD]
+    # sort by strength of probability
+    results.sort(key=lambda x: x[1], reverse=True)
+    return_list = []
+    for r in results:
+        # print(classes[r[0]])
+        # print(r[1])
+        if(r[1] > 0.95):
+            return_list.append({"intent": classes[r[0]], "probability": str(r[1])})
+        elif(classes[r[0]] == "options" and r[1] > 0.55):
+            return_list.append({"intent": classes[r[0]], "probability": str(r[1])})
+    if(return_list != []):
+        tag = return_list[0]['intent']
+        list_of_intents = intents['intents']
+        for i in list_of_intents:
+            if(i['tag']== tag):
+                result = random.choice(i['responses'])
+                break
+        return {"Reply": result}
+    
+    query_bow = dictionary.doc2bow(sentence_words)
     query_tfidf = circular_tfidf_model[query_bow]
     query_lsi = circular_lsi_model[query_tfidf]
 
