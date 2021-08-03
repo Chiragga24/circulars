@@ -88,8 +88,8 @@ def search_similar_circulars(search_term):
     results.sort(key=lambda x: x[1], reverse=True)
     return_list = []
     for r in results:
-        # print(classes[r[0]])
-        # print(r[1])
+        print(classes[r[0]])
+        print(r[1])
         if(r[1] > 0.95):
             return_list.append({"intent": classes[r[0]], "probability": str(r[1])})
         elif(classes[r[0]] == "options" and r[1] > 0.55):
