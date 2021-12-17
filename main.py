@@ -11,10 +11,11 @@ from keras.models import load_model
 model = load_model('chatbot_model.h5')
 import json
 import random
+import backend
 intents = json.loads(open('intents.json').read())
 words = pickle.load(open('words.pkl','rb'))
 classes = pickle.load(open('classes.pkl','rb'))
-circulars = pd.read_csv('Test_File.csv')
+# circulars = pd.read_csv('Test_File.csv')
 
 from spacy.lang.en.stop_words import STOP_WORDS
 
@@ -118,12 +119,12 @@ def search_similar_circulars(search_term):
 
         circulars_names[j] ={
                 'Relevance': round((relevance[1] * 100),2),
-                'File Name': circulars['File Name'][relevance[0]],
-                'URI': circulars['URI'][relevance[0]]
+                'File Name': backend.circulars['File Name'][relevance[0]],
+                'URI': backend.circulars['URI'][relevance[0]]
             }
 
         if j == (circular_index.num_best-1):
             break
     if(not circulars_names):
-        return "No result found!"
+        return "Unable to Process Request atm!!"
     return circulars_names

@@ -6,8 +6,9 @@ import string
 import operator
 import re
 import spacy
+from office365.sharepoint.client_context import ClientContext
 
-circulars = pd.read_csv('Test_File.csv')
+# circulars = pd.read_csv('Test_File.csv',converters={'Content_Tokenized': eval})
 # circulars.head()
 
 from spacy.lang.en.stop_words import STOP_WORDS
@@ -55,14 +56,56 @@ def spacy_tokenizer(sentence):
     #return tokens
     return tokens
 
-# Commented out IPython magic to ensure Python compatibility.
-print ('Cleaning and Tokenizing...')
-circulars['Content_tokenized'] = circulars['Content'].map(lambda x: spacy_tokenizer(x))
+# # Commented out IPython magic to ensure Python compatibility.
+# print ('Cleaning and Tokenizing...')
+# circulars['Content_Tokenized'] = circulars['Content'].map(lambda x: spacy_tokenizer(x))
 
-# circulars.head()
 
-content_tokenized = circulars['Content_tokenized']
-# content_tokenized[0:5]
+SP_SITE_URL ='https://section12.sharepoint.com/sites/ABC/'
+SP_DOC_LIBRARY ='Publications'
+USERNAME ='Chiragg24@section12.onmicrosoft.com'
+PASSWORD ='Fasttuner12!' 
+
+
+# SP_SITE_URL ='https://team.hpcl.in/sites/'
+# SP_DOC_LIBRARY ='e-Docs'
+# USERNAME ='Hpcl\\31111110'
+# PASSWORD ='Hpcl@123' 
+
+
+# 1. Create a ClientContext object and use the user’s credentials for authentication 
+ctx =ClientContext(SP_SITE_URL).with_user_credentials(USERNAME, PASSWORD) 
+
+# 2. Read file entities from the SharePoint document library 
+oList = ctx.web.lists.get_by_title(SP_DOC_LIBRARY) 
+items = oList.items 
+ctx.load(items)
+ctx.execute_query()
+d = {'File Name': [],
+     'URI': [],
+      'Content_Tokenized': []}
+# 3. loop through file entities
+for item in items: 
+  # 4. Access list item properties. Parse file unique Id from the ServerRedirectedEmbedUri property of the list item 
+  # dic_query_string =parse.parse_qs(parse.urlsplit(item.properties['ServerRedirectedEmbedUri']).query)
+  # 5. Retrieve the file object from the list item 
+  file = item.file 
+  ctx.load(file) 
+  ctx.execute_query() 
+  # print('Unique Id:{0}, Name: {1}'.format(file.properties['UniqueId'], file.properties['Name']))
+  pdf_content = file.read().decode('utf-8','ignore')
+  uri = "https://section12.sharepoint.com/sites/ABC/Publications/{}?&web=1".format(file.properties['Name'])
+  d['File Name'].append(file.properties['Name'])
+  d['URI'].append(uri)
+  x = spacy_tokenizer(pdf_content)
+  d['Content_Tokenized'].append(x)
+
+circulars = pd.DataFrame(d)
+
+print(circulars.head())
+
+content_tokenized = circulars['Content_Tokenized']
+print(content_tokenized[0:5])
 
 # Commented out IPython magic to ensure Python compatibility.
 from gensim import corpora
