@@ -61,17 +61,6 @@ def spacy_tokenizer(sentence):
 # circulars['Content_Tokenized'] = circulars['Content'].map(lambda x: spacy_tokenizer(x))
 
 
-SP_SITE_URL ='https://section12.sharepoint.com/sites/ABC/'
-SP_DOC_LIBRARY ='Publications'
-USERNAME ='Chiragg24@section12.onmicrosoft.com'
-PASSWORD ='Fasttuner12!' 
-
-
-# SP_SITE_URL ='https://team.hpcl.in/sites/'
-# SP_DOC_LIBRARY ='e-Docs'
-# USERNAME ='Hpcl\\31111110'
-# PASSWORD ='Hpcl@123' 
-
 
 # 1. Create a ClientContext object and use the user’s credentials for authentication 
 ctx =ClientContext(SP_SITE_URL).with_user_credentials(USERNAME, PASSWORD) 
@@ -94,7 +83,6 @@ for item in items:
   ctx.execute_query() 
   # print('Unique Id:{0}, Name: {1}'.format(file.properties['UniqueId'], file.properties['Name']))
   pdf_content = file.read().decode('utf-8','ignore')
-  uri = "https://section12.sharepoint.com/sites/ABC/Publications/{}?&web=1".format(file.properties['Name'])
   d['File Name'].append(file.properties['Name'])
   d['URI'].append(uri)
   x = spacy_tokenizer(pdf_content)
